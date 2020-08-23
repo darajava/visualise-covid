@@ -270,7 +270,7 @@
     position: absolute;
     font-size: 12px;
     bottom: 7px;
-    opacity: 0.8;
+    opacity: 0.5;
     right: 7px;
     color: white;
   }
