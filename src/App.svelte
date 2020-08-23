@@ -14,7 +14,7 @@
   }
 
   let chance = 0;
-  let country = "USA";
+  let country = "World";
   let type = "deaths";
   let loading = true;
 
@@ -23,7 +23,18 @@
     axios.get("https://coronavirus-19-api.herokuapp.com/countries").then(res => {
       countries = res.data;
       countryList = res.data.map(el => {
-        return el.country;
+        if (el.country !== "Diamond Princess")
+          return el.country;
+      }).sort((e1, e2) => {
+        console.log(e1);
+        if (e1 === "World") {
+          return -1;
+        }
+        if (e2 === "World") {
+          return 1;
+        }
+        return e1 < e2 ? -1 : 1;
+
       });
       loading = false;
       refetch();
