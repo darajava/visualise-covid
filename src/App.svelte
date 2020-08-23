@@ -16,25 +16,16 @@
   let chance = 0;
   let country = "World";
   let type = "deaths";
+  let sorting = "alphabetical";
   let loading = true;
 
-  let countries, countryList = [];
+  let countries = [], countryList = [];
   const getCountries = () => {
     axios.get("https://coronavirus-19-api.herokuapp.com/countries").then(res => {
       countries = res.data;
       countryList = res.data.map(el => {
         if (el.country !== "Diamond Princess")
           return el.country;
-      }).sort((e1, e2) => {
-        console.log(e1);
-        if (e1 === "World") {
-          return -1;
-        }
-        if (e2 === "World") {
-          return 1;
-        }
-        return e1 < e2 ? -1 : 1;
-
       });
       loading = false;
       refetch();
@@ -43,11 +34,53 @@
 
   getCountries();
 
+  const changeSort = () => {
+    setTimeout(() => {
+      if (sorting !== "alphabetical") {
+        type = sorting;
+      }
+
+      refetch()
+    }, 0)
+  }
+
   let label, perMillion;
   const refetch = (e) => {
-    console.log(country)
-    console.log(type)
     
+    countries = countries.sort((e1, e2) => {
+      if (e1.country === "World") {
+        return -1;
+      }
+      if (e2.country === "World") {
+        return 1;
+      }
+
+      const population1 = (e1.deaths / e1.deathsPerOneMillion) * 1000000;
+      const population2 = (e2.deaths / e2.deathsPerOneMillion) * 1000000;
+
+      switch (sorting) {
+        case "alphabetical":
+          return e1.country < e2.country ? -1 : 1;
+        case "deaths":
+          return e2.deathsPerOneMillion - e1.deathsPerOneMillion
+        case "cases":
+          return e2.casesPerOneMillion - e1.casesPerOneMillion
+        case "tests":
+          return e2.testsPerOneMillion - e1.testsPerOneMillion
+        case "cases-today":
+          const casesTodayPerMillion1 = (1000000 / population1) * e1.todayCases;
+          const casesTodayPerMillion2 = (1000000 / population2) * e2.todayCases;
+
+          return casesTodayPerMillion2 - casesTodayPerMillion1;
+        case "deaths-today":
+          const deathsTodayPerMillion1 = (1000000 / population1) * e1.todayDeaths;
+          const deathsTodayPerMillion2 = (1000000 / population2) * e2.todayDeaths;
+
+          return deathsTodayPerMillion2 - deathsTodayPerMillion1;
+      }
+
+    });
+
     let cachedCountry = countries.find(e => e.country === country);
 
     const population = (cachedCountry.deaths / cachedCountry.deathsPerOneMillion) * 1000000;
@@ -126,8 +159,8 @@
   <div class={`${loading ? "hidden" : ""}`}>
     <div class={`input-holder`}>
       <select class="country-input" on:change={() => setTimeout(refetch, 0)} bind:value={country}>
-        {#each countryList as countryLabel}
-          <option value={countryLabel}>{countryLabel}</option>
+        {#each countries as currentCountry}
+          <option value={currentCountry.country}>{currentCountry.country}</option>
         {/each}
       </select>
 
@@ -138,6 +171,15 @@
         <option value="tests">Tests per million</option>
         <option value="cases-today">Cases today per million</option>
         <option value="deaths-today">Deaths today per million</option>
+      </select>
+
+      <select class="sort-input" on:change={changeSort} bind:value={sorting}>
+        <option value="alphabetical">Alphabetical</option>
+        <option value="deaths">Deaths p/m descending</option>
+        <option value="cases">Cases p/m descending</option>
+        <option value="tests">Tests p/m descending</option>
+        <option value="cases-today">Cases today p/m descending</option>
+        <option value="deaths-today">Deaths today p/m descending</option>
       </select>
     </div>
 
@@ -171,14 +213,14 @@
     left: 10px;
   }
 
-  .type-input, .country-input {
+  .type-input, .country-input, .sort-input {
     opacity: 0.5;
     padding: 10px;
     font-size: 18px;
     transition: all 0.4s; 
   }
 
-  .type-input:hover, .country-input:hover, .country-input:active, .type-input:active {
+  .type-input:hover, .country-input:hover, .country-input:active, .type-input:active, .sort-input:hover, .sort-input:active {
     opacity: 1;
   }
 
@@ -213,10 +255,11 @@
   }
 
   @media (max-width:480px)  {
-    .type-input, .country-input {
+    .type-input, .country-input, .sort-input {
       width: calc(100% - 10px);
       margin: auto;
-      margin: 5px 0;
+      margin: 2px 0;
+      padding: 5px;
     }
   }
 </style>
