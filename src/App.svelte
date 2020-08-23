@@ -197,6 +197,9 @@
       width={1666}
       height={600}
     ></canvas>
+    <div class="attribution">
+      Stats from <a target="_blank" href="https://github.com/javieraviles/covidAPI">javieraviles'</a> API based on <a target="_blank" href="https://github.com/disease-sh/API#sources">multiple sources</a>
+    </div>
   </div>
 </div>
 
@@ -261,5 +264,18 @@
       margin: 2px 0;
       padding: 5px;
     }
+  }
+
+  .attribution {
+    position: absolute;
+    font-size: 12px;
+    bottom: 7px;
+    opacity: 0.8;
+    right: 7px;
+    color: white;
+  }
+
+  .attribution a {
+    color: white;
   }
 </style>
